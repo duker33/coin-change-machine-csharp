@@ -17,7 +17,7 @@ namespace CoinChangeMachine.Tests
         [Fact]
         public void MakeChange_WithPossibleSum_ReturnsMaximalValueCoinsFirst()
         {
-            var actual = Program.MakeChange(new[] { (5, 2), (2, 5) }, 10);
+            var actual = Program.MakeChange(new[] { (5, 4), (2, 6) }, 10);
 
             Assert.Equal(new[] {(5, 2)}, actual);
         }

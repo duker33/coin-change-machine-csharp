@@ -18,41 +18,52 @@
 
         public static IReadOnlyCollection<(int value, int count)> MakeChange(IEnumerable<(int value, int count)> coins, int sum)
         {
-            var sortedCoins = coins.OrderByDescending(x => x.value);
-            var result = new List<(int value, int count)>();
-
-            using (var enumerator = sortedCoins.GetEnumerator())
+            try
             {
-                while (enumerator.MoveNext() && sum > 0)
-                {
-                    var value = enumerator.Current.value;
-                    var count = Math.Max(sum / value, enumerator.Current.count);
-                    sum -= value * count;
+                var sortedCoins = coins.OrderByDescending(x => x.value);
 
-                    if (sum < 0)
-                        return new (int value, int count)[0];
-
-                    result.Add((value, count));
-                }
+                return BuildChange(sortedCoins, sum).ToArray();
             }
-
-            return result;
+            catch (InvalidOperationException)
+            {
+                return new (int value, int count)[0];
+            }
         }
 
-        public static IEnumerable<(int value, int count)> ReadCoins(TextReader reader)
+        private static IEnumerable<(int value, int count)> BuildChange(IOrderedEnumerable<(int value, int count)> sortedCoins, int sum)
+        {
+            foreach (var coin in sortedCoins)
+            {
+                var count = Math.Min(sum / coin.value, coin.count);
+
+                sum -= coin.value * count;
+
+                yield return (coin.value, count);
+
+                if (sum == 0)
+                    yield break;
+            }
+
+            if (sum > 0)
+                throw new InvalidOperationException();
+        }
+
+        public static (int value, int count)[] ReadCoins(TextReader reader)
         {
             var n = int.Parse(reader.ReadLine());
+            var result = new (int value, int count)[n];
             for (int i = 0; i < n; i++)
             {
                 var coin = reader.ReadLine()
                                  .Split(' ');
 
                 Debug.Assert(coin.Length == 2);
-                var value = int.Parse(coin[0]);
-                var count = int.Parse(coin[1]);
 
-                yield return (value, count);
+                result[i].value = int.Parse(coin[0]);
+                result[i].count = int.Parse(coin[1]);
             }
+
+            return result;
         }
 
         public static void WriteCoins(IReadOnlyCollection<(int value, int count)> coins, TextWriter writer)
