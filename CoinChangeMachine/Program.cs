@@ -36,6 +36,9 @@
             {
                 var count = Math.Min(sum / coin.value, coin.count);
 
+                if (count == 0)
+                    continue;
+
                 sum -= coin.value * count;
 
                 yield return (coin.value, count);
